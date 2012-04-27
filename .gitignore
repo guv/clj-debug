@@ -1,0 +1,7 @@
+/*.jar
+/classes
+/lib
+/bin
+.lein-deps-sum
+pom.xml
+ccw.repl.cmdhistory.prefs
