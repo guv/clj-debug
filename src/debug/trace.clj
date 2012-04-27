@@ -1,4 +1,12 @@
-; Gunnar Völkel:
+; Copyright (c) Gunnar Völkel. All rights reserved.
+; The use and distribution terms for this software are covered by the
+; Eclipse Public License 1.0 (http://opensource.org/licenses/eclipse-1.0.php)
+; which can be found in the file epl-v1.0.txt at the root of this distribution.
+; By using this software in any fashion, you are agreeing to be bound by
+; the terms of this license.
+; You must not remove this notice, or any other, from this software.
+
+
 ; - NOT SUPPORTED (atm):
 ;   * variable parameter lists of traced functions
 ;
@@ -13,7 +21,7 @@
 (ns debug.trace 
   "Library that enables tracing of function calls without having to change the function definitions.  
   "
-  {:author "Gunnar Völkel"}  
+  {:author "Gunnar Völkel"}
   (:use [debug.inspect :only (inspect)])     
   (:use debug.intercept)  
   (:use debug.trace.data)
@@ -147,7 +155,7 @@
       (if v
         ; ... then a new symbol with the found namespace is created ...
         (create-symbol (get-namespace-symbol v) symb)
-        ; ... else return the symbol unchanged. (TODO: exception?)
+        ; ... else return the symbol unchanged.
         symb))))
 
 (defn print+return [x] (println (if x x "nil"))(flush) x)  
@@ -234,7 +242,7 @@
 
 
 (defmethod trace-macro 'clojure.core/let
-  [expr](println "let!")
+  [expr]
  `(binding [*parent-call-node* (trace-begin-expr-call '~(resolve-first expr) '~expr)]
     (execute ~trace-end-expr-call
 	    (~(first expr) 
