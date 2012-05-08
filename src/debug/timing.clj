@@ -10,7 +10,6 @@
   {:author "Gunnar Völkel"}
   (:use [clojure.string :only (join)])
   (:use [clojure.contrib.def :only (defvar-)])
-;  (:use clojure.contrib.debug)
   (:use [debug.timing.gui :only (show-timing-tree-table)])
   (:use debug.timing.data)
   (:use debug.intercept))

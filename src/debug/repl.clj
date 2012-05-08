@@ -125,7 +125,7 @@ values."
 	           (clojure.main/repl
               :init 
               #(do                  
-                 (use 'clojure.contrib.debug)
+                 (use 'debug.repl)
                  (use 'debug.inspect))                 
 	            :prompt 
 	            #(print (str "dr-" *level* "-" counter# 
