@@ -8,8 +8,8 @@ Library for debugging Clojure programms. More documentation will be written soon
 Add one of the following to your ```project.clj``` to let Leiningen install ```clj-debug``` for you:
 
 ```clj
-:dependencies [[clj-debug "0.5.0"]]
-:dev-dependencies [[clj-debug "0.5.0"]]
+:dependencies [[clj-debug "0.5.1"]]
+:dev-dependencies [[clj-debug "0.5.1"]]
 ```
 
 
