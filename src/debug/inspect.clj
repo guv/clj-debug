@@ -40,10 +40,12 @@
   ([data]
     (inspect   data, 800, 400))
   ([data, width, height]
-    (with-tree-cell-renderer-factory   create-registered-icons-tree-cell-renderer
-		  (show-tree-table  
-	      (force (create-treenode (unwrap-mutable-data data))), 
-	      inspect-column-specs, "Improved Clojure Inspector", true, width, height))))
+    (try
+	    (with-tree-cell-renderer-factory   create-registered-icons-tree-cell-renderer
+			  (show-tree-table  
+		      (force (create-treenode (unwrap-mutable-data data))), 
+		      inspect-column-specs, "Improved Clojure Inspector", true, width, height))
+      (catch Throwable t (println "Inspection failed with exception") (flush)))))
 
 
 (defn inspect-result
