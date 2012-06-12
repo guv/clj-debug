@@ -9,8 +9,6 @@
 (ns debug.timing.gui
   {:author "Gunnar Völkel"}
   (:import (org.jdesktop.swingx.tree DefaultXTreeCellRenderer))
-  (:use [clojure.contrib.def :only (defvar-)])
-  (:use clojure.contrib.math)
   (:use [clojure.string :only (blank? split)])
   (:use debug.timing.data)
   (:use swing.treetable swing.resources))
@@ -21,7 +19,7 @@
 (def leaf-timing-icon (create-image-from-resource "debug/timing/clock-line.png"))
 
 
-(defvar- timing-column-specs 
+(def ^{:private true} timing-column-specs 
   [(swing.treetable.ColumnSpecification.   "Recorded Methods", 348, nil)  
    (swing.treetable.ColumnSpecification.             "#CALLS",  90, (create-int-cell-renderer))
    (swing.treetable.ColumnSpecification.          "#OUTLIERS",  50, (create-string-cell-renderer :right))
@@ -64,10 +62,10 @@
         (= column 0)  (str (:func-name timing-data) " [#" (:func-params-count timing-data) "]" )
         (= column 1)  (get-call-count     timing-data)
         (= column 2)  (get-outlier-string timing-data)        
-        (= column 3)  (/ (floor (get-duration-min timing-data)) 1000000.0) ;(format "%,13.3f" (/ (floor (/ (get-duration-min timing-data) 1000.0)) 1000.0) )  
-        (= column 4)  (/ (floor (get-duration-max timing-data)) 1000000.0) ;(format "%,13.3f" (/ (ceil (/ (get-duration-max timing-data) 1000.0)) 1000.0) ) 
-        (= column 5)  (/ (floor (get-duration-avg timing-data)) 1000000.0) ;(format "%,13.3f" (/ (round (/ (get-duration-avg timing-data) 1000.0)) 1000.0) ) 
-        (= column 6)  (/ (floor (get-duration-sum timing-data)) 1000000.0) ;(format "%,13.3f" (/ (ceil (/ (get-duration-sum timing-data) 1000.0)) 1000.0) ) 
+        (= column 3)  (/ (Math/floor (get-duration-min timing-data)) 1000000.0) ;(format "%,13.3f" (/ (floor (/ (get-duration-min timing-data) 1000.0)) 1000.0) )  
+        (= column 4)  (/ (Math/floor (get-duration-max timing-data)) 1000000.0) ;(format "%,13.3f" (/ (ceil (/ (get-duration-max timing-data) 1000.0)) 1000.0) ) 
+        (= column 5)  (/ (Math/floor (get-duration-avg timing-data)) 1000000.0) ;(format "%,13.3f" (/ (round (/ (get-duration-avg timing-data) 1000.0)) 1000.0) ) 
+        (= column 6)  (/ (Math/floor (get-duration-sum timing-data)) 1000000.0) ;(format "%,13.3f" (/ (ceil (/ (get-duration-sum timing-data) 1000.0)) 1000.0) ) 
         (= column 7)  (:func-ns         timing-data)
         (= column 8)  (format "[%s]" (:func-params     timing-data))))))
 

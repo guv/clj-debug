@@ -24,12 +24,11 @@
   (:use 
     (debug.inspect text treenodes gui inspectable)
     debug.intercept)
-  (:use swing.treetable)  
-  (:use [clojure.contrib.def :only (defvar-)]))
+  (:use swing.treetable))
 
 
 
-(defvar- inspect-column-specs 
+(def ^{:private true} inspect-column-specs 
   [(swing.treetable.ColumnSpecification.   "Structure", 600, nil)  
    (swing.treetable.ColumnSpecification.            "", 180, (create-string-cell-renderer :center))])
 

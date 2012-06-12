@@ -7,10 +7,16 @@
 ; You must not remove this notice, or any other, from this software.
 
 (ns debug.tools
-  {:author "Gunnar Völkel"}
-  (:use [clojure.contrib.reflect :as reflect]))
+  {:author "Gunnar Völkel"})
 
-
+(defn get-field
+  "Access to private or protected field. field-name is a symbol or keyword.
+  COPIED from clojure.contrib.reflect since I still need Clojure 1.2.1 compatibility.
+  "
+  [klass field-name obj]
+  (-> klass (.getDeclaredField (name field-name))
+      (doto (.setAccessible true))
+      (.get obj)))
 
 (defn lazy-seq? [x]
    (or 
@@ -20,7 +26,7 @@
 (defn unrealized? [x]
   (and 
     (instance? clojure.lang.LazySeq x)
-    (reflect/get-field clojure.lang.LazySeq "fn" x)))
+    (get-field clojure.lang.LazySeq "fn" x)))
 
 
 (defn extract-realized-seq [x]

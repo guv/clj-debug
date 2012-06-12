@@ -9,7 +9,7 @@
 (ns debug.inspect.gui
   {:author "Gunnar Völkel"}
   (:import org.jdesktop.swingx.tree.DefaultXTreeCellRenderer)
-  (:use clojure.contrib.core)
+  (:use [clojure.core.incubator :only [-?>>]])
   (:use [debug.inspect.str :only (debug-str)])
   (:use swing.treetable swing.resources)
   (:use 

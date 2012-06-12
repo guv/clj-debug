@@ -8,7 +8,6 @@
 
 (ns debug.inspect.text
   {:author "Gunnar Völkel"}
-  (:use [clojure.contrib.def :only (defvar-)])
   (:use [debug.inspect.str :only (debug-str)])  
   (:use [debug.tools :only (extract-realized-seq)]))
 

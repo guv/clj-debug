@@ -9,7 +9,6 @@
 (ns debug.timing
   {:author "Gunnar Völkel"}
   (:use [clojure.string :only (join)])
-  (:use [clojure.contrib.def :only (defvar-)])
   (:use [debug.timing.gui :only (show-timing-tree-table)])
   (:use debug.timing.data)
   (:use debug.intercept))
@@ -267,7 +266,7 @@
 
 
 
-(defvar- default-sort-key :duration-sum)
+(def ^{:private true} default-sort-key :duration-sum)
 
 (defn show-timing-tree
   ([]

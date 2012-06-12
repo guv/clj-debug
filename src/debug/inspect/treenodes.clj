@@ -8,7 +8,6 @@
 
 (ns debug.inspect.treenodes
   {:author "Gunnar Völkel"}
-  (:use [clojure.contrib.def :only (defvar-)])
   (:use swing.treetable swing.resources))
 
 

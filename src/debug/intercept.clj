@@ -13,10 +13,29 @@
   (:require
     [debug.intercept.registry :as registry])
   (:use 
-    [clojure.contrib.core :only(-?>)]
-    [clojure.contrib.def :only (defalias, defvar-)]
+    [clojure.core.incubator :only(-?>)]
     [clojure.string :only (join)])
   (:import java.io.File))
+
+
+; TODO: remove when 1.2.1 compatibility is not needed any more
+(defmacro defalias
+  "Defines an alias for a var: a new var with the same root binding (if
+any) and similar metadata. The metadata of the alias is its initial
+metadata (as provided by def) merged into the metadata of the original.
+COPIED from clojure.contrib.def
+"
+  ([name orig]
+     `(do
+        (alter-meta!
+         (if (.hasRoot (var ~orig))
+           (def ~name (.getRoot (var ~orig)))
+           (def ~name))
+         conj
+         (apply dissoc (meta (var ~orig)) (keys (meta (var ~name)))))
+        (var ~name)))
+  ([name orig doc]
+     (list `defalias (with-meta name (assoc (meta name) :doc doc)) orig)))
 
 
 (defalias core-defn    clojure.core/defn)
@@ -284,7 +303,7 @@
     (catch Exception e false)))
 
 
-(defvar- interception-enabled? false "Determines whether interception of functions is enabled.")
+(def ^{:private true} interception-enabled? false) ; Determines whether interception of functions is enabled.
 
 (defn enable-intercept
   [enabled?]

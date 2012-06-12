@@ -7,8 +7,7 @@
 ; You must not remove this notice, or any other, from this software.
 
 (ns debug.timing.data
-  {:author "Gunnar Völkel"}
-  (:use [clojure.contrib.math :only (sqrt)]))
+  {:author "Gunnar Völkel"})
 
 
 (def ^{:dynamic true} *outlier-guess* 2)
@@ -55,7 +54,7 @@
      :outlier (list)}
     ; else
 	  (let [variance (- sqr-avg (sqr avg))
-	        std-dev (sqrt variance)  
+	        std-dev (Math/sqrt variance)  
 	        limit (* max-deviation-factor std-dev)]
 	    {:values  (filter #(<= (- % avg) limit) poss-outlier-list)
 	     :outlier (filter #(>  (- % avg) limit) poss-outlier-list)})))
