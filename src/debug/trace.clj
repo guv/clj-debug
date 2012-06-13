@@ -204,6 +204,9 @@
     (execute ~trace-end-expr-call
       (~(first expr) ~@(trace-all-exprs (rest expr))))))
 
+(def catch-symb 'catch)
+(def finally-symb 'finally)
+
 (defmethod trace-macro 'try
   [expr]
  `(binding [*parent-call-node* (trace-begin-expr-call '~(resolve-first expr) '~expr)]
@@ -212,8 +215,8 @@
        ~@(for [form (rest expr)]
            (if (seq? form)
 	           (case (first form)
-	             'catch (concat (take 3 form) (trace-all-exprs (drop 3 form)))
-	             'finally (concat (take 1 form) (trace-all-exprs (drop 1 form)))
+	             catch-symb (concat (take 3 form) (trace-all-exprs (drop 3 form)))
+	             finally-symb (concat (take 1 form) (trace-all-exprs (drop 1 form)))
 	             `(trace-expr ~form))
              form))))))
 

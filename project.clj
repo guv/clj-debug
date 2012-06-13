@@ -1,4 +1,4 @@
-(defproject clj-debug "0.6.0"
+(defproject clj-debug "0.6.1"
 	:dependencies 
 	[[org.clojure/clojure "1.2.1"]
    [org.clojure/core.incubator "0.1.0"]
