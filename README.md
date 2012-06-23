@@ -1,6 +1,6 @@
 # clj-debug
 
-Library for debugging Clojure programms. More documentation will be written soon.
+Library for debugging Clojure programms with support for tracing, timing and inspection. More documentation will be written soon.
 
 
 ## Install
@@ -8,14 +8,12 @@ Library for debugging Clojure programms. More documentation will be written soon
 Add one of the following to your ```project.clj``` to let Leiningen install ```clj-debug``` for you:
 
 ```clj
-:dependencies [[clj-debug "0.6.1"]]
-:dev-dependencies [[clj-debug "0.6.1"]]
+:dependencies [[clj-debug "0.6.2"]]
+:dev-dependencies [[clj-debug "0.6.2"]]
 ```
 
 
 ## TODO
-
-* remove all clojure.contrib references
 
 ### debug.trace
 
@@ -26,9 +24,6 @@ Add one of the following to your ```project.clj``` to let Leiningen install ```c
 * there is still a lot of redundancy in the multimethod implementations for handling known macros
 * expression nodes should contain the expression form with filled in parameters
 
-### debug.intercept
-
-* *-setup throws an Exception on reevaluation in REPL (via CCW CTRL+ALT+S; most likely also in general)
 
 ## License
 

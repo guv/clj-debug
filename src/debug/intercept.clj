@@ -6,8 +6,6 @@
 ; the terms of this license.
 ; You must not remove this notice, or any other, from this software.
 
-; * REMARKS:
-;   - *-setup throws an Exception on reevaluation in REPL (via CCW CTRL+ALT+S; most likely also in general)
 (ns debug.intercept
   {:author "Gunnar Völkel"}
   (:require
@@ -17,9 +15,10 @@
     [clojure.string :only (join)])
   (:import java.io.File))
 
-
+; store clojure.core/defn
 (def core-defn    (var-get #'clojure.core/defn))
 (.setMacro (var core-defn))
+; store clojure.core/deftype
 (def core-deftype (var-get #'clojure.core/deftype))
 (.setMacro (var core-deftype))
 
@@ -142,22 +141,26 @@
       nil)))
 
 
+(defn create-intercept-symbol
+  [symb]
+  (symbol "debug.intercept", (name symb)))
+
+(defn create-local-symbol
+  [symb]
+  (symbol (-> *ns* ns-name name) (name symb)))
+
 (defn create-setup-macro
   [registry, create-key, macro-name, intercept-func, info-prefix]
  `(defmacro ~macro-name 
     [& func-symbols#]
-    (do
-      (interception-setup ~registry, ~create-key, ~intercept-func, func-symbols# ~info-prefix)
-      (when (and (not global-interception?) (nil? (resolve (symbol (str *ns* "/defn")) ) ))          
-       `(do              
-          (ns-import-intercept-symbols 
-            '~'~'[
-                  [defn-intercept defn], 
-                  [defn-intercept- defn-], 
-                  [deftype-intercept deftype], 
-                  [defrecord-intercept defrecord]                  
-                 ])          
-          nil)))))
+   `(do
+      (interception-on)
+      (interception-setup 
+        ~'~(create-intercept-symbol registry), 
+        ~'~(create-intercept-symbol create-key), 
+        ~'~(create-local-symbol intercept-func), 
+        '~func-symbols# 
+        ~~info-prefix))))
 
 
 (defn ns-import-intercept-symbols
@@ -285,12 +288,30 @@
     (catch Exception e false)))
 
 
+(defn interception-on
+  "Replaces clojure.core macros for interception. Returns true, when interception was switched on - nil, if it was activated already."
+  []
+  (when-not global-interception?
+	  (alter-var-root #'global-interception? (constantly true))
+	  (alter-var-root #'clojure.core/defn (constantly (var-get #'defn-intercept)))
+	  (alter-var-root #'clojure.core/deftype (constantly (var-get #'deftype-intercept)))
+    true))
+
+(defn interception-off
+  "Restores original clojure.core macros. Returns true, when interception was switched off - nil, if it was deactivated already."
+  []
+  (when global-interception?
+	  (alter-var-root #'global-interception? (constantly false))
+	  (alter-var-root #'clojure.core/defn (constantly (var-get #'core-defn)))
+	  (alter-var-root #'clojure.core/deftype (constantly (var-get #'core-deftype)))
+    true))
+
+
 (def ^{:private true} interception-enabled? false) ; Determines whether interception of functions is enabled.
 
 (defn enable-intercept
   [enabled?]
   (alter-var-root #'interception-enabled? (constantly enabled?)))
-
 
 (defn setup-global-interception
   [file-name, intercept-config-funcs]
@@ -299,10 +320,7 @@
       (use [(symbol (namespace func-symb)) :only [(symbol (name func-symb))]]))
     (refer 'debug.intercept :only '[enable-intercept])
     (load-file file-name)
-    (when interception-enabled?
-      (alter-var-root #'clojure.core/defn (constantly (var-get #'defn-intercept)))
-      (alter-var-root #'global-interception? (constantly true))
-      (alter-var-root #'clojure.core/deftype (constantly (var-get #'deftype-intercept))))))
+    (when interception-enabled? (interception-on))))
 
 (defmacro intercept-global
   [file-name & intercept-config-funcs]
