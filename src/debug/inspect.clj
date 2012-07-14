@@ -53,7 +53,10 @@
   (inspect result)
   result)
 
-
+(defn e
+  "Invokes `inspect` on the last exception in the repl bound to *e."
+  []
+  (inspect *e))
 
 (defn- create-attribute-map [fields]
   (interleave (map (fn [s] `(quote ~s)) fields) (map #(vary-meta % (constantly nil)) fields)))

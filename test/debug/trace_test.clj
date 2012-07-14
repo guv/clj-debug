@@ -10,7 +10,7 @@
   {:author "Gunnar Völkel"}
   (:use debug.trace debug.inspect))
 
-(trace-setup c d f g h Blubb/toString)
+(trace-setup c d f g h Blubb/toString multi)
 (inspection-setup Blubb)
 
   
@@ -40,3 +40,8 @@
 
 (with-trace (g 5) (.toString (Blubb. 10)) (silence (h 0)))
 (with-trace (inspect (Blubb. 42)))
+
+
+;(defn multi
+;  [x y & args]
+;  (apply + x y args))

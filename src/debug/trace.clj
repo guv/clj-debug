@@ -177,20 +177,17 @@
 ; trace-expr is a macro to avoid the recursion pitfall
 (defmacro trace-expr
   [expr]
- `(if *enable-trace*
-    ~(if (seq? expr)
-       (if (or (special-symbol? (first expr)) (macro-expr? expr)) 
-         (trace-macro expr)         
-        `(binding [*parent-call-node* (trace-begin-expr-call '~(resolve-first expr) '~expr)]
-           (execute ~trace-end-expr-call
-             (~(first expr) ~@(trace-all-exprs (rest expr))))))
-       (if (symbol? expr)
-        `(binding [*parent-call-node* (trace-begin-symbol-call '~(resolve-first expr))]
-           (execute ~trace-end-symbol-call ~expr))
-         ; else
-         expr))
-     ; ... else just return expression unchanged.
-     ~expr))
+  (if (seq? expr)
+    (if (or (special-symbol? (first expr)) (macro-expr? expr)) 
+      (trace-macro expr)         
+     `(binding [*parent-call-node* (trace-begin-expr-call '~(resolve-first expr) '~expr)]
+        (execute ~trace-end-expr-call
+          (~(first expr) ~@(trace-all-exprs (rest expr))))))
+    (if (symbol? expr)
+     `(binding [*parent-call-node* (trace-begin-symbol-call '~(resolve-first expr))]
+        (execute ~trace-end-symbol-call ~expr))
+      ; else
+      expr)))
 
 
 (defmethod trace-macro :default

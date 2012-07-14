@@ -46,7 +46,7 @@
 
 
 (defn process-defn-decl
-  [func-decl]
+  [func-symb, func-decl]
   (let [; extract doc string (if present) and create metadata map
 			  meta-map (if (string? (first func-decl)) 
 			             {:doc (first func-decl)} 
@@ -75,6 +75,8 @@
 			  func-decl (if (map? (last func-decl))
 			              (butlast func-decl)
 			              func-decl)
+        ; merge metadata of the function name symbol with the collected metadata 
+        meta-map (merge (meta func-symb) meta-map)
        ]
      {:meta-map meta-map, :func-body-list func-decl}))
 
@@ -99,7 +101,7 @@
 
 (defn intercept-func-def
   [defn-command, intercept-func, func-symb, func-decl]
-  (let [{:keys [meta-map, func-body-list]} (process-defn-decl func-decl),
+  (let [{:keys [meta-map, func-body-list]} (process-defn-decl func-symb, func-decl),
         modified-func-bodies (map (partial intercept-func *ns* func-symb) func-body-list)]  
     `(~defn-command ~func-symb ~meta-map ~@modified-func-bodies)))
 
@@ -115,7 +117,7 @@
      `(~defn-command ~func-symb ~@func-decl)      
       ; ... else apply interception function on function body before definition.
      `(do
-        (print-function-interception-info   ~info-prefix, (str *ns* "/" '~func-symb), '~(list* (map first (:func-body-list (process-defn-decl func-decl)))) )           
+        (print-function-interception-info   ~info-prefix, (str *ns* "/" '~func-symb), '~(list* (map first (:func-body-list (process-defn-decl func-symb, func-decl)))) )           
         ~(intercept-func-def defn-command intercept-fn func-symb func-decl)))))
 
 
