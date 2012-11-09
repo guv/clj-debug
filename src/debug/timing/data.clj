@@ -160,32 +160,33 @@
 
 (defn update-duration-statistic
   [func-data, duration]
-  ; if possible outlier list is not full, ...
-  (if (< (count (:poss-outlier-list func-data))  *outlier-guess*)
-    ; ... then add the current duration value ...
-    (update-in func-data
-      [:poss-outlier-list]
-      (fn [outlier-list]
-        (sort > (conj outlier-list duration))))
-    ; ... else check if that value belongs in the outlier list ...
-    (let [comb-sorted-list (sort > (conj (:poss-outlier-list func-data) duration)) 
-          new-outlier-list (take *outlier-guess* comb-sorted-list)
-          value (last comb-sorted-list)]
-      (-> func-data        
-        (assoc :poss-outlier-list new-outlier-list)
-        (update-in [:duration-avg] update-avg (:call-count func-data) value )
-        (update-in [:square-duration-avg] update-avg (:call-count func-data) (sqr value) )
-        (update-in [:duration-min] 
-          (fn [current-min] 
-            (if (nil? current-min) 
-              value 
-              (min current-min value))))
-        (update-in [:duration-max] 
-          (fn [current-max] 
-            (if (nil? current-max) 
-              value 
-              (max current-max value))))
-        (update-in [:call-count] inc)))))
+  (let [duration (double duration)]
+    ; if possible outlier list is not full, ...
+	  (if (< (count (:poss-outlier-list func-data))  *outlier-guess*)
+	    ; ... then add the current duration value ...
+	    (update-in func-data
+	      [:poss-outlier-list]
+	      (fn [outlier-list]
+	        (sort > (conj outlier-list duration))))
+	    ; ... else check if that value belongs in the outlier list ...
+	    (let [comb-sorted-list (sort > (conj (:poss-outlier-list func-data) duration)) 
+	          new-outlier-list (take *outlier-guess* comb-sorted-list)
+	          value (last comb-sorted-list)]
+	      (-> func-data        
+	        (assoc :poss-outlier-list new-outlier-list)
+	        (update-in [:duration-avg] update-avg (:call-count func-data) value )
+	        (update-in [:square-duration-avg] update-avg (:call-count func-data) (sqr value) )
+	        (update-in [:duration-min] 
+	          (fn [current-min] 
+	            (if (nil? current-min) 
+	              value 
+	              (min current-min value))))
+	        (update-in [:duration-max] 
+	          (fn [current-max] 
+	            (if (nil? current-max) 
+	              value 
+	              (max current-max value))))
+	        (update-in [:call-count] inc))))))
 
 ; func-sig func-ns func-name func-params call-count duration-min duration-max duration-avg square-duration-avg poss-outlier-list
 (defn- merge-averages
