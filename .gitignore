@@ -5,3 +5,5 @@
 .lein-deps-sum
 pom.xml
 ccw.repl.cmdhistory.prefs
+.lein-repl-history
+target
