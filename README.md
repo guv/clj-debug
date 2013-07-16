@@ -8,8 +8,8 @@ Library for debugging Clojure programms with support for tracing, timing and ins
 Add one of the following to your ```project.clj``` to let Leiningen install ```clj-debug``` for you:
 
 ```clj
-:dependencies [[clj-debug "0.6.4"]]
-:dev-dependencies [[clj-debug "0.6.4"]]
+:dependencies [[clj-debug "0.7.1"]]
+:profiles {:dev {:dependencies [[clj-debug "0.7.1"]]}}
 ```
 
 
@@ -27,6 +27,6 @@ Add one of the following to your ```project.clj``` to let Leiningen install ```c
 
 ## License
 
-Copyright © 2012 Gunnar Völkel
+Copyright © 2012-2013 Gunnar Völkel
 
 Distributed under the Eclipse Public License, the same as Clojure.

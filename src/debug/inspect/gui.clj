@@ -8,8 +8,7 @@
 
 (ns debug.inspect.gui
   {:author "Gunnar Völkel"}
-  (:import org.jdesktop.swingx.tree.DefaultXTreeCellRenderer)
-  (:use [clojure.core.incubator :only [-?>>]])
+  (:import org.jdesktop.swingx.tree.DefaultXTreeCellRenderer)  
   (:use [debug.inspect.str :only (debug-str)])
   (:use swing.treetable swing.resources)
   (:use 
@@ -328,7 +327,7 @@
           (fn [ste]
             (delay (create-value-node [(str (.getClassName ste) "." (.getMethodName ste)), (str (.getFileName ste) ":" (.getLineNumber ste))] ::STACKTRACE-NODE)))
           ; for all child objects
-          (filter #(not (-?>> % .getFileName (re-matches #".*\.java"))) stack-trace)),
+          (filter #(not (some->> % .getFileName (re-matches #".*\.java"))) stack-trace)),
         child-nodes
         (concat 
           delayed-stacktrace-element-nodes

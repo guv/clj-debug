@@ -10,8 +10,7 @@
   {:author "Gunnar Völkel"}
   (:require
     [debug.intercept.registry :as registry])
-  (:use 
-    [clojure.core.incubator :only(-?>)]
+  (:use
     [clojure.string :only (join)])
   (:import java.io.File))
 
@@ -173,7 +172,7 @@
 
 (defn resolvable-fn?
   [fsymb]
-  (-?> fsymb resolve var-get fn?))
+  (some-> fsymb resolve var-get fn?))
 
 (defmacro create-function-interception-setup-macro
   [macro-name, intercept-func, info-prefix]   
