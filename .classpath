@@ -1,8 +1,11 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <classpath>
 	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER"/>
-<<<<<<< HEAD
-	<classpathentry kind="src" path="src"/>
+	<classpathentry kind="src" path="src">
+		<attributes>
+			<attribute name="optional" value="true"/>
+		</attributes>
+	</classpathentry>
 	<classpathentry kind="src" path="test">
 		<attributes>
 			<attribute name="optional" value="true"/>
@@ -28,17 +31,5 @@
 			<attribute name="org.eclipse.jdt.launching.CLASSPATH_ATTR_LIBRARY_PATH_ENTRY" value="clj-debug/target/native/linux/x86_64"/>
 		</attributes>
 	</classpathentry>
-=======
-	<classpathentry kind="lib" path="classes"/>
-	<classpathentry kind="lib" path="lib/clojure-1.2.1.jar"/>
-	<classpathentry kind="lib" path="lib/core.incubator-0.1.0.jar"/>
-	<classpathentry kind="lib" path="lib/swingx-action-1.6.3.jar"/>
-	<classpathentry kind="lib" path="lib/swingx-autocomplete-1.6.3.jar"/>
-	<classpathentry kind="lib" path="lib/swingx-common-1.6.3.jar"/>
-	<classpathentry kind="lib" path="lib/swingx-core-1.6.3.jar"/>
-	<classpathentry kind="lib" path="lib/swingx-painters-1.6.3.jar"/>
-	<classpathentry kind="lib" path="lib/swingx-plaf-1.6.3.jar"/>
-	<classpathentry combineaccessrules="false" kind="src" path="/clj-gui"/>
->>>>>>> Update auf clj-gui 0.2.1.
 	<classpathentry kind="output" path="bin"/>
 </classpath>
