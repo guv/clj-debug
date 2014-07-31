@@ -1,4 +1,4 @@
-(defproject clj-debug "0.7.3"
+(defproject clj-debug "0.7.4-SNAPSHOT"
   :description "Library for debugging Clojure programms with support for tracing, timing and inspection."
   :url "https://github.com/guv/clj-debug"
   :license {:name "Eclipse Public License"

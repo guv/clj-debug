@@ -32,6 +32,32 @@
   [(swing.treetable.ColumnSpecification.   "Structure", 600, nil)  
    (swing.treetable.ColumnSpecification.            "", 180, (create-string-cell-renderer :center))])
 
+(def ^:dynamic *max-window-count* 10)
+(def ^:private window-count (ref 0))
+(def ^:private first-warning (ref true))
+
+
+;void windowActivated(WindowEvent e)
+;void 	windowClosed(WindowEvent e)
+;void 	windowClosing(WindowEvent e)
+;void 	windowDeactivated(WindowEvent e)
+;void 	windowDeiconified(WindowEvent e)
+;void 	windowIconified(WindowEvent e)
+;void 	windowOpened(WindowEvent e)
+
+
+(defn- closing-window-listener
+  [frame]
+  (.addWindowListener frame,
+    (reify java.awt.event.WindowListener
+      (windowActivated [_, _])
+      (windowClosing [_, _])
+      (windowDeactivated [_, _])
+      (windowDeiconified [_, _])
+      (windowIconified [_, _])
+      (windowOpened [_, _])
+      (windowClosed [_, _]
+        (dosync (alter window-count dec))))))
 
 
 (defn inspect
@@ -39,12 +65,26 @@
   ([data]
     (inspect   data, 800, 400))
   ([data, width, height]
-    (try
-	    (with-tree-cell-renderer-factory   create-registered-icons-tree-cell-renderer
-			  (show-tree-table  
-		      (force (create-treenode (unwrap-mutable-data data))), 
-		      inspect-column-specs, "Improved Clojure Inspector", true, width, height))
-      (catch Throwable t (println "Inspection failed with exception") (flush)))))
+    (dosync
+      (let [wnd-cnt (ensure window-count),
+            first?  (ensure first-warning)]
+        (if (< wnd-cnt *max-window-count*) 
+          (try
+            (with-tree-cell-renderer-factory   create-registered-icons-tree-cell-renderer
+              (let [frame (show-tree-table  
+                               (force (create-treenode (unwrap-mutable-data data))), 
+                               inspect-column-specs, "Improved Clojure Inspector", true, width, height)]
+                (closing-window-listener frame)
+                (alter window-count inc)
+                (when-not first?
+                  (ref-set first-warning true))
+                frame))
+            (catch Throwable t (println "Inspection failed with exception") (flush)))
+          (when first?
+            (ref-set first-warning false)            
+            (println
+              (format "Maximum number of inspect windows reached (%d)! Future calls to inspect will be ignored."
+                *max-window-count*))))))))
 
 
 (defn inspect-result
