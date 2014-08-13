@@ -93,6 +93,19 @@
   (inspect result)
   result)
 
+
+(defmacro local-bindings
+  "Produces a map of the names of local bindings to their values."
+  []
+  (let [symbols (keys &env)]
+    (zipmap (map (fn [sym] `(quote ~sym)) symbols) symbols)))
+
+
+(defmacro inspect-locals
+  []
+  `(inspect (local-bindings)))
+
+
 (defn e
   "Invokes `inspect` on the last exception in the repl bound to *e."
   []
