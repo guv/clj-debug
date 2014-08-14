@@ -63,8 +63,10 @@
 (defn inspect
   "Creates a graphical (Swing) inspector on the supplied hierarchical data."
   ([data]
-    (inspect   data, 800, 400))
-  ([data, width, height]
+    (inspect data, nil, 800, 400))
+  ([data, title]
+    (inspect data, title, 800, 400))
+  ([data, title, width, height]
     (dosync
       (let [wnd-cnt (ensure window-count),
             first?  (ensure first-warning)]
@@ -73,7 +75,7 @@
             (with-tree-cell-renderer-factory   create-registered-icons-tree-cell-renderer
               (let [frame (show-tree-table  
                                (force (create-treenode (unwrap-mutable-data data))), 
-                               inspect-column-specs, "Improved Clojure Inspector", true, width, height)]
+                               inspect-column-specs, (or title "Improved Clojure Inspector"), true, width, height)]
                 (closing-window-listener frame)
                 (alter window-count inc)
                 (when-not first?
@@ -102,8 +104,10 @@
 
 
 (defmacro inspect-locals
-  []
-  `(inspect (local-bindings)))
+  ([]
+    `(inspect (local-bindings)))
+  ([title]
+    `(inspect (local-bindings), ~title)))
 
 
 (defn e
