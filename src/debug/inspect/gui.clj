@@ -39,7 +39,7 @@
   {:open-icon open-details-icon, :closed-icon closed-details-icon})
 
 (defn atom? [x]
-  (not (coll? x)))
+  (not (or (coll? x) (instance? java.util.List x))))
 
 (defn collection-tag [x]
   (cond    
