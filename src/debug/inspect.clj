@@ -109,6 +109,15 @@
   ([title]
     `(inspect (local-bindings), ~title)))
 
+(defmacro print-locals
+  ([]
+    `(print-locals "locals"))
+  ([title]
+    `(do
+       (println (str "\n" ~title))
+       (doseq [[lb# val#] (sort-by key (local-bindings))]
+         (println lb# "= " (if (.isArray (class val#)) (vec val#) val#))))))
+
 
 (defn e
   "Invokes `inspect` on the last exception in the repl bound to *e."
