@@ -99,7 +99,7 @@
 (defmacro local-bindings
   "Produces a map of the names of local bindings to their values."
   []
-  (let [symbols (keys &env)]
+  (let [symbols (mapv #(with-meta % nil) (keys &env))]
     (zipmap (map (fn [sym] `(quote ~sym)) symbols) symbols)))
 
 
