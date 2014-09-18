@@ -8,7 +8,6 @@
 
 (ns debug.inspect.gui
   {:author "Gunnar Völkel"}
-  (:import org.jdesktop.swingx.tree.DefaultXTreeCellRenderer)
   (:require
     [debug.inspect.str :refer [debug-str]]
     (swing 
@@ -18,7 +17,13 @@
       [text :refer [data->text]]      
       [treenodes :as tn]
       [inspectable :as insp])
-    [debug.tools :as tools]))
+    [debug.tools :as tools])
+  (:import
+    org.jdesktop.swingx.tree.DefaultXTreeCellRenderer
+    javax.swing.JFrame))
+
+
+(declare popup-menu-items)
 
 
 (def closed-inspect-icon (rsc/create-image-from-resource "debug/inspect/inspect-white.png"))
@@ -205,14 +210,17 @@
 		    (force (nth delayed-child-nodes index)))
 		  (GetValueAt [this, column]
         (if (instance? java.util.Map$Entry realized-obj)
-			    (case column
+			    (case (int column)
             0 (debug-str-map-key (key realized-obj))
 				    1 (get-text (val realized-obj)) 
 				    "")
-          (case column
+          (case (int column)
             0 (get-text realized-obj)
             "")))
-      (GetNodeType [this] ::INSPECTION-NODE))))
+      (GetNodeType [this] ::INSPECTION-NODE)
+      tt/IInteractive
+      (context-menu-actions [this]
+        (popup-menu-items this, realized-obj)))))
 
 (defmethod tn/get-treenode-icons ::INSPECTION-NODE [_]
   {:open-icon open-inspect-icon :closed-icon closed-inspect-icon :leaf-icon leaf-inspect-icon})
@@ -233,7 +241,10 @@
 		    (if (and (<= 0 column) (< column (count value-list)))
 		      (nth value-list column)
 		      ""))
-	    (GetNodeType [this] node-type))))
+	    (GetNodeType [this] node-type)
+      tt/IInteractive
+      (context-menu-actions [this]
+        (popup-menu-items this, value-list)))))
 
 
 (defn create-object-node
@@ -252,7 +263,10 @@
 			    (if (and (<= 0 column) (< column (count value-list)))
 			      (nth value-list column)
 			      ""))
-	      (GetNodeType [this] node-type)))))
+	      (GetNodeType [this] node-type)
+       tt/IInteractive
+       (context-menu-actions [this]
+         (popup-menu-items this, value-list))))))
 
 
 (defn create-object-sequence-node
@@ -272,25 +286,31 @@
 			    (if (and (<= 0 column) (< column (count value-list)))
 			      (nth value-list column)
 			      ""))
-	      (GetNodeType [this] node-type)))))
+	      (GetNodeType [this] node-type)
+       tt/IInteractive
+       (context-menu-actions [this]
+        (popup-menu-items this, value-list))))))
 
 
 (defn create-node-sequence-node
   ([value-list, child-node-list]
     (create-node-sequence-node  value-list, child-node-list, nil))
   ([value-list, child-node-list, node-type]
-	  (reify
+    (reify
 	    tt/ITreeTableNode
-		  (IsLeaf [this] false)
-		  (GetChildCount [this] 
+      (IsLeaf [this] false)
+      (GetChildCount [this] 
         (count child-node-list))
-		  (GetChild [this, index]
-	      (force (nth child-node-list index)))
-		  (GetValueAt [this, column]
-		    (if (and (<= 0 column) (< column (count value-list)))
-		      (nth value-list column)
-		      ""))
-	    (GetNodeType [this] node-type))))
+      (GetChild [this, index]
+        (force (nth child-node-list index)))
+      (GetValueAt [this, column]
+	      (if (and (<= 0 column) (< column (count value-list)))
+		       (nth value-list column)
+		       ""))
+      (GetNodeType [this] node-type)
+      tt/IInteractive
+      (context-menu-actions [this]
+        (popup-menu-items this, value-list)))))
 
 
 
@@ -349,3 +369,38 @@
 
 (defmethod tn/get-treenode-icons :EXCEPTION-NODE [_]
   {:open-icon open-exception-icon :closed-icon closed-exception-icon})
+
+
+
+(def ^{:private true} inspect-column-specs 
+  [(swing.treetable.ColumnSpecification.   "Structure", 600, nil)  
+   (swing.treetable.ColumnSpecification.            "", 180, (tt/create-string-cell-renderer :center))])
+
+(defn show-inspect-tree-table
+  ([data]
+    (show-inspect-tree-table data, nil, 800, 400))
+  ([data, title]
+    (show-inspect-tree-table data, title, 800, 400))
+  ([data, title, width, height]  
+    (tt/with-tree-cell-renderer-factory create-registered-icons-tree-cell-renderer
+      (tt/show-tree-table  
+        (force (tn/create-treenode (unwrap-mutable-data data))), 
+        inspect-column-specs, (or title "Improved Clojure Inspector"), true, width, height))))
+
+
+(defn show-inspect-tree-table-for-node
+  [tree-node, ^JFrame table-frame, tree-table, e]
+  (let [width (.getWidth table-frame),
+        height (.getHeight table-frame),
+        title (.getTitle table-frame)]
+    (tt/with-tree-cell-renderer-factory create-registered-icons-tree-cell-renderer
+       (tt/show-tree-table  
+         tree-node, 
+         inspect-column-specs,
+         (format "%s - %s" title (tt/GetValueAt tree-node, 0))
+         true, width, height))))
+
+
+(defn popup-menu-items
+  [tree-node, data]
+  [["Open in separate window" (partial show-inspect-tree-table-for-node tree-node)]])

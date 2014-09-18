@@ -6,5 +6,5 @@
   :min-lein-version "2.0.0"
 	:dependencies 
 	[[org.clojure/clojure "1.6.0"]
-   [clj-gui "0.3.3"]]
+   [clj-gui "0.3.4-SNAPSHOT"]]
   :aot [debug.inspect.inspectable])

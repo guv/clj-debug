@@ -22,19 +22,16 @@
      (javax.swing.tree TreeModel DefaultTreeCellRenderer)     
      (javax.swing JTree JTable JScrollPane JFrame SwingUtilities JLabel))  
   (:require
+    [clojure.stacktrace :refer [print-cause-trace]]
     [swing.treetable :as tt]
     (debug.inspect
       text
       [treenodes :as tn]
       [gui :as gui]
-      inspectable)
+      [inspectable :as insp])
     [debug.intercept :as icpt]))
 
 
-
-(def ^{:private true} inspect-column-specs 
-  [(swing.treetable.ColumnSpecification.   "Structure", 600, nil)  
-   (swing.treetable.ColumnSpecification.            "", 180, (tt/create-string-cell-renderer :center))])
 
 (def ^:dynamic *max-window-count* 10)
 (def ^:private window-count (ref 0))
@@ -76,16 +73,13 @@
             first?  (ensure first-warning)]
         (if (< wnd-cnt *max-window-count*) 
           (try
-            (tt/with-tree-cell-renderer-factory   gui/create-registered-icons-tree-cell-renderer
-              (let [frame (tt/show-tree-table  
-                               (force (tn/create-treenode (gui/unwrap-mutable-data data))), 
-                               inspect-column-specs, (or title "Improved Clojure Inspector"), true, width, height)]
+            (let [frame (gui/show-inspect-tree-table data, title, width, height)]
                 (closing-window-listener frame)
                 (alter window-count inc)
                 (when-not first?
                   (ref-set first-warning true))
-                frame))
-            (catch Throwable t (println "Inspection failed with exception") (flush)))
+                frame)
+            (catch Throwable t (println "Inspection failed with the following exception:") (print-cause-trace t) (flush)))
           (when first?
             (ref-set first-warning false)            
             (println
@@ -136,7 +130,7 @@
   (let [attr-map (create-attribute-map fields)]
 	  [fields
 	  `(~@specs
-	     Inspectable
+	     insp/Inspectable
        (attribute-map [this] (hash-map ~@attr-map)))]))
  
 (icpt/create-type-interception-macros inspection-setup, inspection, intercept-type-for-inspection, "INSPECT")
