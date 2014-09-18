@@ -21,16 +21,20 @@
      (java.awt.event ActionEvent ActionListener)
      (javax.swing.tree TreeModel DefaultTreeCellRenderer)     
      (javax.swing JTree JTable JScrollPane JFrame SwingUtilities JLabel))  
-  (:use 
-    (debug.inspect text treenodes gui inspectable)
-    debug.intercept)
-  (:use swing.treetable))
+  (:require
+    [swing.treetable :as tt]
+    (debug.inspect
+      text
+      [treenodes :as tn]
+      [gui :as gui]
+      inspectable)
+    [debug.intercept :as icpt]))
 
 
 
 (def ^{:private true} inspect-column-specs 
   [(swing.treetable.ColumnSpecification.   "Structure", 600, nil)  
-   (swing.treetable.ColumnSpecification.            "", 180, (create-string-cell-renderer :center))])
+   (swing.treetable.ColumnSpecification.            "", 180, (tt/create-string-cell-renderer :center))])
 
 (def ^:dynamic *max-window-count* 10)
 (def ^:private window-count (ref 0))
@@ -72,9 +76,9 @@
             first?  (ensure first-warning)]
         (if (< wnd-cnt *max-window-count*) 
           (try
-            (with-tree-cell-renderer-factory   create-registered-icons-tree-cell-renderer
-              (let [frame (show-tree-table  
-                               (force (create-treenode (unwrap-mutable-data data))), 
+            (tt/with-tree-cell-renderer-factory   gui/create-registered-icons-tree-cell-renderer
+              (let [frame (tt/show-tree-table  
+                               (force (tn/create-treenode (gui/unwrap-mutable-data data))), 
                                inspect-column-specs, (or title "Improved Clojure Inspector"), true, width, height)]
                 (closing-window-listener frame)
                 (alter window-count inc)
@@ -135,4 +139,4 @@
 	     Inspectable
        (attribute-map [this] (hash-map ~@attr-map)))]))
  
-(create-type-interception-macros inspection-setup, inspection, intercept-type-for-inspection, "INSPECT")
+(icpt/create-type-interception-macros inspection-setup, inspection, intercept-type-for-inspection, "INSPECT")

@@ -8,34 +8,36 @@
 
 (ns debug.inspect.gui
   {:author "Gunnar Völkel"}
-  (:import org.jdesktop.swingx.tree.DefaultXTreeCellRenderer)  
-  (:use [debug.inspect.str :only (debug-str)])
-  (:use swing.treetable swing.resources)
-  (:use 
+  (:import org.jdesktop.swingx.tree.DefaultXTreeCellRenderer)
+  (:require
+    [debug.inspect.str :refer [debug-str]]
+    (swing 
+      [treetable :as tt]
+      [resources :as rsc])
     (debug.inspect
-      (text :only [data->text])
-      treenodes
-      inspectable))
-  (:use debug.tools)
-)
-
-(def closed-inspect-icon (create-image-from-resource "debug/inspect/inspect-white.png"))
-(def open-inspect-icon (create-image-from-resource "debug/inspect/inspect-black.png"))
-(def leaf-inspect-icon (create-image-from-resource "debug/inspect/inspect-line2.png"))
-
-(def closed-exception-icon (create-image-from-resource "debug/inspect/exception-white.png"))
-(def open-exception-icon (create-image-from-resource "debug/inspect/exception-black.png"))
-
-(def leaf-stacktrace-icon (create-image-from-resource "debug/inspect/stacktrace-line.png"))
-
-(def closed-details-icon (create-image-from-resource "debug/inspect/info-white.png"))
-(def open-details-icon (create-image-from-resource "debug/inspect/info-black.png"))
+      [text :refer [data->text]]      
+      [treenodes :as tn]
+      [inspectable :as insp])
+    [debug.tools :as tools]))
 
 
-(defmethod get-treenode-icons ::STACKTRACE-NODE [_]
+(def closed-inspect-icon (rsc/create-image-from-resource "debug/inspect/inspect-white.png"))
+(def open-inspect-icon (rsc/create-image-from-resource "debug/inspect/inspect-black.png"))
+(def leaf-inspect-icon (rsc/create-image-from-resource "debug/inspect/inspect-line2.png"))
+
+(def closed-exception-icon (rsc/create-image-from-resource "debug/inspect/exception-white.png"))
+(def open-exception-icon (rsc/create-image-from-resource "debug/inspect/exception-black.png"))
+
+(def leaf-stacktrace-icon (rsc/create-image-from-resource "debug/inspect/stacktrace-line.png"))
+
+(def closed-details-icon (rsc/create-image-from-resource "debug/inspect/info-white.png"))
+(def open-details-icon (rsc/create-image-from-resource "debug/inspect/info-black.png"))
+
+
+(defmethod tn/get-treenode-icons ::STACKTRACE-NODE [_]
   {:leaf-icon leaf-stacktrace-icon})
 
-(defmethod get-treenode-icons ::STACKTRACE-DETAILS-NODE [_]
+(defmethod tn/get-treenode-icons ::STACKTRACE-DETAILS-NODE [_]
   {:open-icon open-details-icon, :closed-icon closed-details-icon})
 
 (defn atom? [x]
@@ -44,7 +46,7 @@
 (defn collection-tag [x]
   (cond    
     (nil? x) :nil
-    (satisfies? Inspectable x) :inspectable
+    (satisfies? insp/Inspectable x) :inspectable
     (instance? java.util.Map$Entry x) :entry
     (instance? java.util.Map x) :map 
     (set? x) :set
@@ -79,10 +81,10 @@
   false)
 
 (defmethod get-child :inspectable [parent index]
-  (unwrap-mutable-data (nth (sort-by key (attribute-map parent)) index) ))
+  (unwrap-mutable-data (nth (sort-by key (insp/attribute-map parent)) index) ))
 
 (defmethod get-child-count :inspectable [parent]
-  (count (attribute-map parent)))
+  (count (insp/attribute-map parent)))
 
 (defmethod is-leaf :default [node]
   (atom? node))
@@ -182,19 +184,19 @@
 		  children-seq)))
 
   
-(defmethod create-treenode :default
+(defmethod tn/create-treenode :default
   [obj]
-  (let [realized-obj (extract-realized-seq obj)
+  (let [realized-obj (tools/extract-realized-seq obj)
         leaf? (is-leaf realized-obj)
         child-count (if leaf? 0 (get-child-count realized-obj)),
         ; build list of delayed child node creations (only created when needed and only once)
         delayed-child-nodes
         (map 
-          (fn [child-obj] (delay (create-treenode child-obj)))
+          (fn [child-obj] (delay (tn/create-treenode child-obj)))
           ; for all child objects
           (get-children-seq realized-obj, child-count))]
     (reify
-      ITreeTableNode
+      tt/ITreeTableNode
       (IsLeaf [this]
 		    leaf?)
 		  (GetChildCount [this]
@@ -212,7 +214,7 @@
             "")))
       (GetNodeType [this] ::INSPECTION-NODE))))
 
-(defmethod get-treenode-icons ::INSPECTION-NODE [_]
+(defmethod tn/get-treenode-icons ::INSPECTION-NODE [_]
   {:open-icon open-inspect-icon :closed-icon closed-inspect-icon :leaf-icon leaf-inspect-icon})
 
 
@@ -223,7 +225,7 @@
     (create-value-node   value-list, nil))
   ([value-list, node-type]
 		(reify
-	    ITreeTableNode
+	    tt/ITreeTableNode
 	    (IsLeaf [this] true)
 		  (GetChildCount [this] 0)
 		  (GetChild [this, index] nil)
@@ -238,9 +240,9 @@
   ([value-list, object]
     (create-object-node   value-list, object, nil))
   ([value-list, object, node-type]
-	  (let [object-node (delay (create-treenode object))]
+	  (let [object-node (delay (tn/create-treenode object))]
 		  (reify
-		    ITreeTableNode
+		    tt/ITreeTableNode
 			  (IsLeaf [this] false)
 			  (GetChildCount [this] 1)
 			  (GetChild [this, index]
@@ -259,9 +261,9 @@
   ([value-list, object-list, node-type]
 	  (let [child-count (count object-list),	               
 	        ; build list of delayed child node creations (only created when needed and only once)
-	        delayed-child-nodes (map (fn [child-obj] (delay (create-treenode child-obj))) object-list)]    
+	        delayed-child-nodes (map (fn [child-obj] (delay (tn/create-treenode child-obj))) object-list)]    
 			(reify
-			  ITreeTableNode
+			  tt/ITreeTableNode
 			  (IsLeaf [this] false)
 			  (GetChildCount [this] child-count)
 			  (GetChild [this, index]
@@ -278,7 +280,7 @@
     (create-node-sequence-node  value-list, child-node-list, nil))
   ([value-list, child-node-list, node-type]
 	  (reify
-	    ITreeTableNode
+	    tt/ITreeTableNode
 		  (IsLeaf [this] false)
 		  (GetChildCount [this] 
         (count child-node-list))
@@ -298,7 +300,7 @@
     (getTreeCellRendererComponent [^javax.swing.JTree tree, ^Object value, ^Boolean isSelected, ^Boolean isExpanded, ^Boolean isLeaf, ^Integer row, ^Boolean hasFocus]
       (let [renderValue (.getValueAt tree-table-model value 0),
             renderer (proxy-super getTreeCellRendererComponent tree, renderValue, isSelected, isExpanded, isLeaf, row, hasFocus),
-            custom-icons (get-treenode-icons (GetNodeType value))]        
+            custom-icons (tn/get-treenode-icons (tt/GetNodeType value))]        
         (when-not (nil? custom-icons)
           (let [{:keys [open-icon closed-icon leaf-icon]} custom-icons]
             (if isLeaf
@@ -310,7 +312,7 @@
 
 
 
-(defmethod create-treenode java.lang.Throwable
+(defmethod tn/create-treenode java.lang.Throwable
   [exception]
   (let [stack-trace (.getStackTrace exception),
         child-count (count stack-trace),
@@ -337,7 +339,7 @@
         (if (nil? cause)
           child-nodes
           (cons 
-            (create-treenode cause)
+            (tn/create-treenode cause)
             child-nodes))]
     ; stacktrace
     (create-node-sequence-node 
@@ -345,5 +347,5 @@
       child-nodes
       :EXCEPTION-NODE)))
 
-(defmethod get-treenode-icons :EXCEPTION-NODE [_]
+(defmethod tn/get-treenode-icons :EXCEPTION-NODE [_]
   {:open-icon open-exception-icon :closed-icon closed-exception-icon})
