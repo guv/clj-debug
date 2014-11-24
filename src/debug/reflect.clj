@@ -61,7 +61,7 @@
     (ifn? x) x
     :else (constantly true)))
 
-(defn show
+(defn reflect
   "Prints all static and instance members of x or (class x).
   Examples: (show Integer) (show []) (show String 23) (show String \"case\") (show String #\".*Case\")"
   ([x] (show x (constantly true)))  
