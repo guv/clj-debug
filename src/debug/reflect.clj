@@ -64,7 +64,7 @@
 (defn reflect
   "Prints all static and instance members of x or (class x).
   Examples: (show Integer) (show []) (show String 23) (show String \"case\") (show String #\".*Case\")"
-  ([x] (show x (constantly true)))  
+  ([x] (reflect x (constantly true)))  
   ([x, pred]
 	  (let [pred-fn (create-pred-fn pred)
           c (if (class? x) x (class x))
