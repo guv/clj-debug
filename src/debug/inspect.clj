@@ -107,6 +107,17 @@
   ([title]
     `(inspect (local-bindings), ~title)))
 
+(defmacro try-inspect
+  {:arglists '([& body] [title & body])}
+  ([& args]
+    (let [title (when (string? (first args)) (first args))
+          body (if title (rest args) args)]
+      `(try
+         ~@body
+         (catch Throwable ~'ex
+           (inspect-locals ~@(when title [title]))
+           (throw ~'ex))))))
+
 (defmacro print-locals
   ([]
     `(print-locals "locals"))
