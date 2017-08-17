@@ -33,7 +33,7 @@
   [ns-str, name-str]
   (FunctionCallNode.   ns-str, name-str, (atom []), (atom []), (atom nil)))
 
-(defn add-param! [func-call-node, name, value]
+(defn add-param! [^FunctionCallNode func-call-node, name, value]
   (swap! (.param-name-value-list func-call-node) conj {:name name, :value value}))
 
 

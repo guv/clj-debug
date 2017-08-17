@@ -10,17 +10,19 @@
   {:author "Gunnar Völkel"}
   (:require
     [debug.inspect.str :refer [debug-str]]
-    (swing 
+    (swing
       [treetable :as tt]
       [resources :as rsc])
     (debug.inspect
-      [text :refer [data->text]]      
+      [text :refer [data->text]]
       [treenodes :as tn]
       [inspectable :as insp])
-    [debug.tools :as tools])
+    [debug.tools :as tools]
+    [swing.super :as s])
   (:import
     org.jdesktop.swingx.tree.DefaultXTreeCellRenderer
-    javax.swing.JFrame))
+    javax.swing.JFrame
+    (org.jdesktop.swingx.treetable AbstractTreeTableModel)))
 
 
 (declare popup-menu-items)
@@ -315,11 +317,11 @@
 
 
 (defn create-registered-icons-tree-cell-renderer
-  [tree-table-model]
+  [^AbstractTreeTableModel tree-table-model]
   (proxy [DefaultXTreeCellRenderer] []
     (getTreeCellRendererComponent [^javax.swing.JTree tree, ^Object value, ^Boolean isSelected, ^Boolean isExpanded, ^Boolean isLeaf, ^Integer row, ^Boolean hasFocus]
       (let [renderValue (.getValueAt tree-table-model value 0),
-            renderer (proxy-super getTreeCellRendererComponent tree, renderValue, isSelected, isExpanded, isLeaf, row, hasFocus),
+            ^DefaultXTreeCellRenderer renderer (s/proxy-super-class DefaultXTreeCellRenderer, getTreeCellRendererComponent, tree, renderValue, isSelected, isExpanded, isLeaf, row, hasFocus),
             custom-icons (tn/get-treenode-icons (tt/GetNodeType value))]        
         (when-not (nil? custom-icons)
           (let [{:keys [open-icon closed-icon leaf-icon]} custom-icons]
@@ -333,23 +335,26 @@
 
 
 (defmethod tn/create-treenode java.lang.Throwable
-  [exception]
+  [^Exception exception]
   (let [stack-trace (.getStackTrace exception),
         child-count (count stack-trace),
         leaf? (zero? child-count),
         ; build list of delayed child node creations (only created when needed and only once)
         delayed-detail-stacktrace-element-nodes
         (map 
-          (fn [ste]
+          (fn [^StackTraceElement ste]
             (delay (create-value-node [(str (.getClassName ste) "." (.getMethodName ste)), (str (.getFileName ste) ":" (.getLineNumber ste))] ::STACKTRACE-NODE)))
           ; for all child objects
           stack-trace),
         delayed-stacktrace-element-nodes
         (map 
-          (fn [ste]
+          (fn [^StackTraceElement ste]
             (delay (create-value-node [(str (.getClassName ste) "." (.getMethodName ste)), (str (.getFileName ste) ":" (.getLineNumber ste))] ::STACKTRACE-NODE)))
           ; for all child objects
-          (filter #(not (some->> % .getFileName (re-matches #".*\.java"))) stack-trace)),
+          (filter
+            (fn [^StackTraceElement ste]
+              (not (some->> ste .getFileName (re-matches #".*\.java"))))
+            stack-trace)),
         child-nodes
         (concat 
           delayed-stacktrace-element-nodes

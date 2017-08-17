@@ -282,7 +282,7 @@
   (def*-intercept 'clojure.core/defrecord, name, fields, specs))
 
 (defn file-exists?
-  [file-name]
+  [^String file-name]
   (try
 	  (when-let [f (File. file-name)]
 	    (and (.exists f) (.isFile f)))

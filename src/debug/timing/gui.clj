@@ -8,10 +8,14 @@
 
 (ns debug.timing.gui
   {:author "Gunnar Völkel"}
-  (:import (org.jdesktop.swingx.tree DefaultXTreeCellRenderer))
+  (:require [debug.tools :as tools]
+            [swing.super :as s])
+  (:import (org.jdesktop.swingx.tree DefaultXTreeCellRenderer)
+           (org.jdesktop.swingx.treetable AbstractTreeTableModel))
   (:use [clojure.string :only (blank? split)])
   (:use debug.timing.data)
-  (:use swing.treetable swing.resources))
+  (:use swing.treetable
+        swing.resources))
 
 
 (def closed-timing-icon (create-image-from-resource "debug/timing/clock-white.png"))
@@ -89,11 +93,11 @@
 
 
 (defn- create-timing-tree-cell-renderer
-  [tree-table-model]
+  [^AbstractTreeTableModel tree-table-model]
   (proxy [DefaultXTreeCellRenderer] []
     (getTreeCellRendererComponent [^javax.swing.JTree tree, ^Object value, ^Boolean isSelected, ^Boolean isExpanded, ^Boolean isLeaf, ^Integer row, ^Boolean hasFocus]
       (let [renderValue (.getValueAt tree-table-model value 0),
-            renderer (proxy-super getTreeCellRendererComponent tree, renderValue, isSelected, isExpanded, isLeaf, row, hasFocus)]              
+            ^DefaultXTreeCellRenderer renderer (s/proxy-super-class DefaultXTreeCellRenderer getTreeCellRendererComponent, tree, renderValue, isSelected, isExpanded, isLeaf, row, hasFocus)]
         (if isLeaf
           (.setIcon renderer leaf-timing-icon)
           (if isExpanded

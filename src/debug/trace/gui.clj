@@ -10,12 +10,14 @@
   {:author "Gunnar Völkel"}
   (:use [clojure.string :only (join)])
   (:use debug.trace.data)
-  (:use swing.treetable swing.resources)  
-  (:use 
+  (:use swing.treetable
+        swing.resources)
+  (:use
     (debug.inspect
       treenodes
       gui
-      (text :only [data->text]))))
+      (text :only [data->text])))
+  (:import (debug.trace.data SymbolNode MacroNode ExpressionCallNode FunctionCallNode)))
 
 
 (def closed-function-icon   (create-image-from-resource "debug/trace/function-white.png"))
@@ -82,8 +84,8 @@
 
 
 
-(def-treenode-with-icons debug.trace.data.FunctionCallNode, {:open-icon open-function-icon :closed-icon closed-function-icon},
-  [func-call-node]
+(def-treenode-with-icons FunctionCallNode, {:open-icon open-function-icon :closed-icon closed-function-icon},
+  [^FunctionCallNode func-call-node]
   (let [caption (str (.name-str func-call-node) " [" (join ", " (map :name @(.param-name-value-list func-call-node)) ) "]")
         result-str (-> func-call-node (.return) deref :value data->text)]         
 	  (create-node-sequence-node 
@@ -116,8 +118,8 @@
       ::PARAMETER-LIST-NODE)))
 
 
-(def-treenode-with-icons debug.trace.data.ExpressionCallNode, {:open-icon open-expression-icon :closed-icon closed-expression-icon},
-  [expr-call-node]
+(def-treenode-with-icons ExpressionCallNode, {:open-icon open-expression-icon :closed-icon closed-expression-icon},
+  [^ExpressionCallNode expr-call-node]
   (let [params-str (join " " (map :param-name (.param-name-expression-list expr-call-node)) ),
         caption (str (.expression expr-call-node)),
         full-spec
@@ -152,7 +154,7 @@
 
 
 (defn- create-expanded-expression-node
-  [macro-node]
+  [^MacroNode macro-node]
   (let [result-str (-> macro-node (.return) deref :value data->text),
         expanded-expr (str (.expanded-expression macro-node)),
         subcall-node-list
@@ -163,8 +165,8 @@
 
 
 
-(def-treenode-with-icons debug.trace.data.MacroNode, {:open-icon open-macro-icon :closed-icon closed-macro-icon},
-  [macro-node]
+(def-treenode-with-icons MacroNode, {:open-icon open-macro-icon :closed-icon closed-macro-icon},
+  [^MacroNode macro-node]
   (let [params-str (join " " (map :param-name (.param-name-expression-list macro-node)) ),
         caption (str (.expression macro-node)),
         full-spec (str "(" (.ns-str macro-node), "/", (.name-str macro-node), " ", params-str ")"),
@@ -182,8 +184,8 @@
 
 
 
-(def-treenode-with-icons debug.trace.data.SymbolNode, {:open-icon open-symbol-icon :closed-icon closed-symbol-icon},
-  [symbol-node]
+(def-treenode-with-icons SymbolNode, {:open-icon open-symbol-icon :closed-icon closed-symbol-icon},
+  [^SymbolNode symbol-node]
   (let [caption (str (.name-str symbol-node)),
         full-spec
         (if (.ns-str symbol-node) 

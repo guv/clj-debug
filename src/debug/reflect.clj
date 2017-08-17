@@ -11,14 +11,15 @@
   (:require
     [clojure.string :as string])
   (:import
-    (java.lang.reflect Modifier Method Constructor)))
+    (java.lang.reflect Modifier Method Constructor Member Field Executable)))
 
 
-(defn param-str [m]
-  (->> m .getParameterTypes (map #(.getSimpleName %)) (string/join ",") (format "(%s)")))
+(defn param-str
+  [^Executable m]
+  (->> m .getParameterTypes (map #(.getSimpleName ^Class %)) (string/join ",") (format "(%s)")))
 
 (defn static?
-  [member]
+  [^Member member]
   (-> member .getModifiers Modifier/isStatic))
 
 (defn method?
@@ -30,8 +31,8 @@
   (instance? Constructor member))
 
 (defn result-type
-  [member]
-  (if (method? member) (.getReturnType member) (.getType member)))
+  ^Class [member]
+  (if (method? member) (.getReturnType ^Method member) (.getType ^Field member)))
 
 (defn member-details [m]
   (let [static? (static? m)
@@ -41,7 +42,7 @@
                (str "<init>" (param-str m))
                (str
                  (when static? "static ")
-                 (.getName m)
+                 (.getName ^Member m)
                  " : "
                  (-> m result-type .getSimpleName)
                  " "
@@ -67,7 +68,7 @@
   ([x] (reflect x (constantly true)))  
   ([x, pred]
 	  (let [pred-fn (create-pred-fn pred)
-          c (if (class? x) x (class x))
+          ^Class c (if (class? x) x (class x))
 	        members (->> (concat (.getFields c) (.getMethods c) (.getConstructors c)) 
 	                  (map member-details)
 	                  (sort-by (juxt (comp not :static?) :method? :text)))

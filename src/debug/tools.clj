@@ -13,10 +13,11 @@
   "Access to private or protected field. field-name is a symbol or keyword.
   COPIED from clojure.contrib.reflect since I still need Clojure 1.2.1 compatibility.
   "
-  [klass field-name obj]
-  (-> klass (.getDeclaredField (name field-name))
-      (doto (.setAccessible true))
-      (.get obj)))
+  [^Class klass, field-name obj]
+  (-> klass
+    (.getDeclaredField (name field-name))
+    (doto (.setAccessible true))
+    (.get obj)))
 
 (defn lazy-seq? [x]
    (or 
@@ -41,8 +42,6 @@
                 (conj realized-seq (first xs))                         
                 (recur (next xs) (conj realized-seq (first xs))))))))
     x ))
-
-
 
 
 (comment

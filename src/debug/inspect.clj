@@ -48,7 +48,7 @@
 
 
 (defn- closing-window-listener
-  [frame]
+  [^JFrame frame]
   (.addWindowListener frame,
     (reify java.awt.event.WindowListener
       (windowActivated [_, _])

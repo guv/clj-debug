@@ -1,4 +1,4 @@
-(defproject clj-debug "0.7.6-SNAPSHOT"
+(defproject clj-debug "0.7.6"
   :description "Library for debugging Clojure programms with support for tracing, timing and inspection."
   :url "https://github.com/guv/clj-debug"
   :license {:name "Eclipse Public License"
@@ -6,5 +6,5 @@
   :min-lein-version "2.0.0"
 	:dependencies 
 	[[org.clojure/clojure "1.6.0"]
-   [clj-gui "0.3.4"]]
+   [clj-gui "0.3.5"]]
   :aot [debug.inspect.inspectable])
