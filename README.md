@@ -27,6 +27,6 @@ Add one of the following to your ```project.clj``` to let Leiningen install ```c
 
 ## License
 
-Copyright © 2012-2014 Gunnar Völkel
+Copyright © 2012-2017 Gunnar Völkel
 
-Distributed under the Eclipse Public License, the same as Clojure.
+Distributed under the Eclipse Public License version 1.0
